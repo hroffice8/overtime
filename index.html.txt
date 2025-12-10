@@ -8,10 +8,10 @@
 </head>
 <body class="bg-gray-100 p-4 font-sans">
 
-  <script>
-    // PASTE YOUR DEPLOYED GOOGLE SCRIPT URL HERE:
-    const API_URL = "https://script.google.com/macros/s/AKfycbxdkuU5AG8xWYgDuiPu6KyM7I9vjU-zChK-mf3q7OcygCKCN5Y-5jirAZG7HWdcmn26uA/exec"; 
-  </script>
+<script>
+  // REPLACE THIS WITH YOUR NEW URL FROM STEP 2
+  const API_URL = "https://script.google.com/macros/s/AKfycbzFvjfUXA9seOb8x1y7zCC_F-reZbTTF_1tTiRPMPk9p7SmV-ZD1YRDpNzNsXolSEdBEQ/exec"; 
+</script>
 
   <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
     
@@ -182,4 +182,5 @@
     }
   </script>
 </body>
+
 </html>
