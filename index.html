@@ -14,20 +14,33 @@
     /* SUCCESS ANIMATION */
     .checkmark-circle { width: 80px; height: 80px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
     .checkmark { color: #16a34a; font-size: 40px; }
+
+    /* RESPONSIVE MODAL FIX */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 50; }
+    .modal-content { 
+      background: white; 
+      padding: 25px; 
+      border-radius: 10px; 
+      width: 90%; /* Responsive Width */
+      max-width: 400px; /* Desktop Max Width */
+      text-align: center; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+    }
   </style>
 </head>
-<body class="bg-gray-100 p-4">
+<body class="bg-gray-100 p-3 md:p-6">
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzFvjfUXA9seOb8x1y7zCC_F-reZbTTF_1tTiRPMPk9p7SmV-ZD1YRDpNzNsXolSEdBEQ/exec"; 
   </script>
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md my-8">
+
+  <div class="max-w-4xl mx-auto bg-white p-4 md:p-8 rounded-lg shadow-md my-4">
     
-    <h2 id="mainTitle" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">DIU Holiday and Overtime Duty Review Portal</h2>
+    <h2 id="mainTitle" class="text-xl md:text-2xl font-bold mb-6 text-gray-800 border-b pb-4">DIU Holiday and Overtime Duty Review Portal</h2>
     
-    <div id="searchSection" class="flex gap-4 mb-6">
-      <input type="text" id="searchInput" placeholder="Enter Employee ID" class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-      <button onclick="searchEmployee()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-bold transition">Search</button>
+    <div id="searchSection" class="flex flex-col sm:flex-row gap-3 mb-6">
+      <input type="text" id="searchInput" placeholder="Enter Employee ID" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <button onclick="searchEmployee()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-bold transition w-full sm:w-auto">Search</button>
     </div>
     
     <div id="loader" class="hidden text-center py-8">
@@ -38,14 +51,14 @@
     <div id="resultArea" class="hidden">
       
       <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div><span class="text-gray-500 block text-xs uppercase font-bold">ID</span><strong id="dispId" class="text-gray-800 text-lg"></strong></div>
+        <div><span class="text-gray-500 block text-xs uppercase font-bold">ID</span><strong id="dispId" class="text-gray-800 text-base"></strong></div>
         <div><span class="text-gray-500 block text-xs uppercase font-bold">Name</span><strong id="dispName" class="text-gray-800"></strong></div>
         <div><span class="text-gray-500 block text-xs uppercase font-bold">Designation</span><strong id="dispDesig" class="text-gray-800"></strong></div>
         <div><span class="text-gray-500 block text-xs uppercase font-bold">Department</span><strong id="dispDept" class="text-gray-800"></strong></div>
       </div>
 
       <div class="overflow-x-auto mb-8 border rounded-lg shadow-sm">
-        <table class="w-full text-sm text-left text-gray-700">
+        <table class="w-full text-sm text-left text-gray-700 whitespace-nowrap">
           <thead class="text-xs text-white uppercase bg-blue-900">
             <tr>
               <th class="px-4 py-3">Date</th>
@@ -62,7 +75,7 @@
         </table>
       </div>
 
-      <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div class="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 shadow-sm">
         <h3 id="formTitle" class="text-lg font-bold text-gray-800">Summary</h3>
         <p class="text-sm text-gray-600 mb-6 font-semibold border-b pb-2">
           Common Holiday and Weekend = 04 Days <br> Weekdays/Working Days = 26 Days
@@ -103,9 +116,9 @@
            </ul>
         </div>
 
-        <label class="flex items-center gap-3 mb-6 font-bold cursor-pointer p-3 bg-white border rounded hover:bg-gray-50">
-          <input type="checkbox" id="termsCheckbox" class="w-5 h-5 text-blue-600"> 
-          <span>I have read and agreed to the above terms.</span>
+        <label class="flex items-start gap-3 mb-6 font-bold cursor-pointer p-3 bg-white border rounded hover:bg-gray-50">
+          <input type="checkbox" id="termsCheckbox" class="w-5 h-5 text-blue-600 mt-1"> 
+          <span class="text-sm md:text-base">I have read and agreed to the above terms.</span>
         </label>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
@@ -114,13 +127,13 @@
              <input type="text" id="supervisorId" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter Your ID">
            </div>
            <div>
-             <label class="block font-bold text-gray-700 mb-1">Supervisor Official Email Address</label>
+             <label class="block font-bold text-gray-700 mb-1">Supervisor Official Email</label>
              <input type="email" id="supervisorEmail" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="supervisor@company.com">
            </div>
         </div>
 
         <div class="mt-8 text-right">
-          <button onclick="initiateOtp()" id="otpBtn" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-bold shadow-md transition transform hover:scale-105">Request OTP & Submit</button>
+          <button onclick="initiateOtp()" id="otpBtn" class="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-bold shadow-md transition transform hover:scale-105">Request OTP & Submit</button>
         </div>
       </div>
     </div>
@@ -136,18 +149,18 @@
 
   </div>
 
-  <div id="otpModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center z-50 backdrop-blur-sm">
-    <div class="bg-white p-8 rounded-xl text-center w-96 shadow-2xl transform transition-all scale-100">
-      <h3 class="text-2xl font-bold mb-2 text-gray-800">Enter Verification Code</h3>
+  <div id="otpModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 class="text-xl font-bold mb-2 text-gray-800">Enter Verification Code</h3>
       <p class="text-sm text-gray-500 mb-6">We sent a 6-digit code to your email.</p>
       
       <input type="text" id="otpInput" class="text-center text-4xl mb-6 font-bold border-b-2 border-gray-300 focus:border-blue-500 w-full py-2 tracking-[0.5em] outline-none" maxlength="6" placeholder="000000">
       
       <div id="timer" class="text-red-500 font-bold mb-6 text-lg">02:00</div>
       
-      <div class="flex gap-3 justify-center">
-        <button onclick="document.getElementById('otpModal').classList.add('hidden')" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
-        <button onclick="verifyOtp()" id="verifyBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow">Verify</button>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="document.getElementById('otpModal').classList.add('hidden')" class="w-full sm:w-auto px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
+        <button onclick="verifyOtp()" id="verifyBtn" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow">Verify</button>
       </div>
     </div>
   </div>
@@ -299,4 +312,3 @@
   </script>
 </body>
 </html>
-
