@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Review Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 font-sans">
+
+  <script>
+    // PASTE YOUR DEPLOYED GOOGLE SCRIPT URL HERE:
+    const API_URL = "https://script.google.com/macros/s/AKfycbxdkuU5AG8xWYgDuiPu6KyM7I9vjU-zChK-mf3q7OcygCKCN5Y-5jirAZG7HWdcmn26uA/exec"; 
+  </script>
+
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    
+    <h2 id="mainTitle" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Attendance Review Portal</h2>
+    
+    <div id="searchSection" class="flex gap-4 mb-6">
+      <input type="text" id="searchInput" placeholder="Enter Employee ID" class="flex-1 p-2 border border-gray-300 rounded">
+      <button onclick="searchEmployee()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-bold">Search</button>
+    </div>
+    <div id="loader" class="text-center hidden py-4 text-gray-500">Searching records...</div>
+
+    <div id="resultArea" class="hidden">
+      
+      <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div><span class="text-gray-500 block">ID</span><strong id="dispId"></strong></div>
+        <div><span class="text-gray-500 block">Name</span><strong id="dispName"></strong></div>
+        <div><span class="text-gray-500 block">Designation</span><strong id="dispDesig"></strong></div>
+        <div><span class="text-gray-500 block">Department</span><strong id="dispDept"></strong></div>
+      </div>
+
+      <div class="overflow-x-auto mb-8 border rounded-lg">
+        <table class="w-full text-sm text-left text-gray-700">
+          <thead class="text-xs text-white uppercase bg-blue-900">
+            <tr><th class="px-4 py-3">Date</th><th>Day</th><th>Sch In</th><th>Sch Out</th><th>In</th><th>Out</th><th>Total</th><th>Status</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+        <h3 id="formTitle" class="text-lg font-bold text-gray-800">Summary</h3>
+        <p class="text-sm text-gray-600 mb-4 font-semibold">Common Holiday and Weekend = 04 Days and Weekdays/Working Days=26 Days</p>
+        
+        <input type="hidden" id="empId">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div><label class="block font-bold">Overtime Duty Days</label><input type="number" id="otDutyDays" class="w-full p-2 border rounded mt-1" step="0.5"></div>
+          <div><label class="block font-bold">Total Overtime Hours</label><input type="number" id="totalOtHours" class="w-full p-2 border rounded mt-1" step="0.5"></div>
+          <div><label class="block font-bold">Total Holiday Days</label><input type="number" id="totalHolidayDays" class="w-full p-2 border rounded mt-1" step="0.5"></div>
+          <div><label class="block font-bold">Total Holiday Hours</label><input type="number" id="totalHolidayHours" class="w-full p-2 border rounded mt-1" step="0.5"></div>
+        </div>
+
+        <div class="mb-4 bg-red-50 p-4 border-l-4 border-red-500 rounded text-sm">
+           <ul class="list-decimal pl-5 space-y-1 text-red-700 font-semibold">
+            <li>যেকোনো হলিডে বা ওভারটাইম ডিউটি বিলের ক্ষেত্রে উপস্থিতির পাঞ্চ বাধ্যতামূলক।</li>
+            <li>সুপারভাইজারের রিকমেন্ডেশন অবশ্যই সামঞ্জস্যপূর্ণ হতে হবে।</li>
+           </ul>
+        </div>
+
+        <label class="flex items-center gap-2 mb-4 font-bold"><input type="checkbox" id="termsCheckbox" class="w-5 h-5"> I agree to the terms.</label>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-4">
+           <div><label class="block font-bold">Supervisor ID</label><input type="text" id="supervisorId" class="w-full p-2 border rounded"></div>
+           <div><label class="block font-bold">Supervisor Email</label><input type="email" id="supervisorEmail" class="w-full p-2 border rounded"></div>
+        </div>
+
+        <div class="mt-6 text-right">
+          <button onclick="initiateOtp()" id="otpBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-bold">Request OTP & Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="successPage" class="hidden text-center py-10">
+      <div class="text-6xl text-green-600 mb-4">✔</div>
+      <h2 class="text-2xl font-bold mb-2">Success!</h2>
+      <p class="text-gray-600 mb-8">Inputs received successfully.</p>
+      <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-2 rounded">Review Another</button>
+    </div>
+  </div>
+
+  <div id="otpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+    <div class="bg-white p-8 rounded-lg text-center w-96">
+      <h3 class="text-xl font-bold mb-4">Enter Code</h3>
+      <input type="text" id="otpInput" class="text-center text-3xl mb-4 font-bold border rounded w-full py-2 tracking-widest" maxlength="6">
+      <div class="flex gap-2 justify-center">
+        <button onclick="document.getElementById('otpModal').classList.add('hidden')" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+        <button onclick="verifyOtp()" id="verifyBtn" class="bg-green-600 text-white px-6 py-2 rounded font-bold">Verify</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- CONNECT TO APPS SCRIPT ---
+    async function searchEmployee() {
+      const id = document.getElementById('searchInput').value;
+      if(!id) return alert("Enter ID");
+      
+      document.getElementById('loader').classList.remove('hidden');
+      document.getElementById('resultArea').classList.add('hidden');
+      
+      try {
+        // FETCH DATA FROM GOOGLE SCRIPT
+        const response = await fetch(`${API_URL}?action=search&id=${id}`);
+        const res = await response.json();
+        
+        document.getElementById('loader').classList.add('hidden');
+        if(!res.found) return alert("ID Not Found");
+
+        // Fill Data
+        document.getElementById('mainTitle').innerText = "Review: " + res.monthName;
+        document.getElementById('formTitle').innerText = "Summary: " + res.dateRange;
+        document.getElementById('dispId').innerText = res.info.id;
+        document.getElementById('empId').value = res.info.id;
+        document.getElementById('dispName').innerText = res.info.name;
+        document.getElementById('dispDesig').innerText = res.info.designation;
+        document.getElementById('dispDept').innerText = res.info.department;
+
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = res.records.map(r => 
+          `<tr class="border-b"><td class="p-2">${r.date}</td><td>${r.day}</td><td>${r.schIn}</td><td>${r.schOut}</td><td>${r.chkIn}</td><td>${r.chkOut}</td><td>${r.total}</td><td>${r.status}</td></tr>`
+        ).join('');
+        
+        document.getElementById('resultArea').classList.remove('hidden');
+
+      } catch(e) { alert("Connection Error: " + e); }
+    }
+
+    async function initiateOtp() {
+      const email = document.getElementById('supervisorEmail').value;
+      if(!document.getElementById('termsCheckbox').checked || !email.includes('@')) return alert("Check fields");
+
+      const btn = document.getElementById('otpBtn');
+      btn.innerText = "Sending..."; btn.disabled = true;
+
+      // SEND OTP TO API
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'sendOtp', email: email })
+      });
+      const res = await response.json();
+
+      btn.innerText = "Request OTP & Submit"; btn.disabled = false;
+      if(res.success) {
+        document.getElementById('otpModal').classList.remove('hidden');
+      } else { alert(res.message); }
+    }
+
+    async function verifyOtp() {
+      const btn = document.getElementById('verifyBtn');
+      btn.innerText = "Verifying..."; btn.disabled = true;
+      
+      const data = {
+        action: 'verify',
+        email: document.getElementById('supervisorEmail').value,
+        otp: document.getElementById('otpInput').value,
+        formData: {
+          empId: document.getElementById('empId').value,
+          supId: document.getElementById('supervisorId').value,
+          otDutyDays: document.getElementById('otDutyDays').value,
+          totalOtHours: document.getElementById('totalOtHours').value,
+          totalHolidayDays: document.getElementById('totalHolidayDays').value,
+          totalHolidayHours: document.getElementById('totalHolidayHours').value
+        }
+      };
+
+      const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+      const res = await response.json();
+
+      if(res.success) {
+        document.getElementById('otpModal').classList.add('hidden');
+        document.getElementById('resultArea').classList.add('hidden');
+        document.getElementById('searchSection').classList.add('hidden');
+        document.getElementById('successPage').classList.remove('hidden');
+      } else {
+        alert("❌ " + res.message);
+        btn.innerText = "Verify"; btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
