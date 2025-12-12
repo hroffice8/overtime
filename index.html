@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DIU Holiday and Overtime Duty Review Portal</title>
+  <title>Attendance Review Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { background-color: #f3f4f6; font-family: 'Segoe UI', sans-serif; }
     
     /* CUSTOM STYLES */
     .sub-label { display: block; font-weight: normal; color: #2563eb; font-size: 12px; margin-bottom: 4px; }
-    
-    /* SUCCESS ANIMATION */
     .checkmark-circle { width: 80px; height: 80px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
     .checkmark { color: #16a34a; font-size: 40px; }
 
@@ -21,20 +19,58 @@
       background: white; 
       padding: 25px; 
       border-radius: 10px; 
-      width: 90%; /* Responsive Width */
-      max-width: 400px; /* Desktop Max Width */
+      width: 90%; 
+      max-width: 400px; 
       text-align: center; 
       box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+    }
+
+    /* =========================================
+       PRINT STYLES (A4 Layout)
+       ========================================= */
+    @media print {
+      @page { size: A4; margin: 10mm; }
+      body { background-color: white; padding: 0; margin: 0; -webkit-print-color-adjust: exact; }
+      
+      /* Hide Non-Print Elements */
+      #searchSection, #otpBtn, #printBtn, #termsCheckboxLabel, #mainTitle, #loader, .no-print, #instructionModal, #otpModal {
+        display: none !important;
+      }
+      
+      /* Hide Supervisor Input Box specifically for print */
+      #supervisorInputSection { display: none !important; }
+
+      /* Show Signature Section (Hidden on screen, visible on print) */
+      #printSignatures { display: flex !important; }
+
+      /* Formatting Fixes for Print */
+      .container { 
+        box-shadow: none; 
+        max-width: 100%; 
+        width: 100%; 
+        padding: 0; 
+        margin: 0; 
+      }
+      /* Remove colored backgrounds to save ink and look cleaner */
+      .bg-gray-50, .bg-blue-50 { background-color: white !important; border: 1px solid #ddd; }
+      
+      /* Clean up inputs for print */
+      input { border: none !important; border-bottom: 1px solid #ccc !important; padding-left: 0; }
+      
+      /* Ensure Table fits */
+      table { font-size: 10px; width: 100%; }
+      th, td { padding: 4px !important; }
     }
   </style>
 </head>
 <body class="bg-gray-100 p-3 md:p-6">
 
   <script>
+    // LIVE API URL
     const API_URL = "https://script.google.com/macros/s/AKfycbzFvjfUXA9seOb8x1y7zCC_F-reZbTTF_1tTiRPMPk9p7SmV-ZD1YRDpNzNsXolSEdBEQ/exec"; 
   </script>
 
-  <div class="max-w-4xl mx-auto bg-white p-4 md:p-8 rounded-lg shadow-md my-4">
+  <div class="max-w-4xl mx-auto bg-white p-4 md:p-8 rounded-lg shadow-md my-4 container">
     
     <h2 id="mainTitle" class="text-xl md:text-2xl font-bold mb-6 text-gray-800 border-b pb-4">DIU Holiday and Overtime Duty Review Portal</h2>
     
@@ -59,23 +95,17 @@
 
       <div class="overflow-x-auto mb-8 border rounded-lg shadow-sm">
         <table class="w-full text-sm text-left text-gray-700 whitespace-nowrap">
-          <thead class="text-xs text-white uppercase bg-blue-900">
+          <thead class="text-xs text-white uppercase bg-blue-900 print:text-black print:bg-gray-200">
             <tr>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Day</th>
-              <th class="px-4 py-3">Sch In</th>
-              <th class="px-4 py-3">Sch Out</th>
-              <th class="px-4 py-3">In</th>
-              <th class="px-4 py-3">Out</th>
-              <th class="px-4 py-3">Total</th>
-              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3">Date</th><th class="px-4 py-3">Day</th><th class="px-4 py-3">Sch In</th><th class="px-4 py-3">Sch Out</th>
+              <th class="px-4 py-3">In</th><th class="px-4 py-3">Out</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Status</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
         </table>
       </div>
 
-      <div class="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 shadow-sm">
+      <div class="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 shadow-sm print:shadow-none print:border-none">
         <h3 id="formTitle" class="text-lg font-bold text-gray-800">Summary</h3>
         <p class="text-sm text-gray-600 mb-6 font-semibold border-b pb-2">
           Common Holiday and Weekend = 04 Days <br> Weekdays/Working Days = 26 Days
@@ -86,28 +116,28 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label class="block font-bold text-gray-700">Overtime Duty Days (per week)</label>
-            <span class="sub-label">[সপ্তাহে কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]</span>
+            <span class="sub-label no-print">[সপ্তাহে কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]</span>
             <input type="number" id="otDutyDays" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
           <div>
             <label class="block font-bold text-gray-700">Total Overtime Hours</label>
-            <span class="sub-label">[সর্বমোট ওভারটাইম ঘন্টা]</span>
+            <span class="sub-label no-print">[সর্বমোট ওভারটাইম ঘন্টা]</span>
             <input type="number" id="totalOtHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
 
           <div>
             <label class="block font-bold text-gray-700">Total Holiday/Weekend Days</label>
-            <span class="sub-label">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]</span>
+            <span class="sub-label no-print">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]</span>
             <input type="number" id="totalHolidayDays" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
           <div>
             <label class="block font-bold text-gray-700">Total Holiday Hours (Max 8/day)</label>
-            <span class="sub-label">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]</span>
+            <span class="sub-label no-print">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]</span>
             <input type="number" id="totalHolidayHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
         </div>
 
-        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded text-sm text-gray-800">
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded text-sm text-gray-800 no-print">
            <h4 class="font-bold text-red-700 mb-2">গুরুত্বপূর্ণ নোট:</h4>
            <ul class="list-decimal pl-5 space-y-1">
             <li>যেকোনো হলিডে বা ওভারটাইম ডিউটি বিলের ক্ষেত্রে উপস্থিতির পাঞ্চ বাধ্যতামূলক।</li>
@@ -116,12 +146,12 @@
            </ul>
         </div>
 
-        <label class="flex items-start gap-3 mb-6 font-bold cursor-pointer p-3 bg-white border rounded hover:bg-gray-50">
+        <label id="termsCheckboxLabel" class="flex items-start gap-3 mb-6 font-bold cursor-pointer p-3 bg-white border rounded hover:bg-gray-50 no-print">
           <input type="checkbox" id="termsCheckbox" class="w-5 h-5 text-blue-600 mt-1"> 
           <span class="text-sm md:text-base">I have read and agreed to the above terms.</span>
         </label>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
+        <div id="supervisorInputSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
            <div>
              <label class="block font-bold text-gray-700 mb-1">Supervisor ID</label>
              <input type="text" id="supervisorId" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter Your ID">
@@ -132,16 +162,32 @@
            </div>
         </div>
 
-        <div class="mt-8 text-right">
-          <button onclick="initiateOtp()" id="otpBtn" class="w-full md:w-auto bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-bold shadow-md transition transform hover:scale-105">Request OTP & Submit</button>
+        <div id="printSignatures" class="hidden justify-between mt-16 pt-8">
+          <div class="text-center">
+            <div class="w-48 border-t border-black pt-2 font-bold">Signature of Employee</div>
+          </div>
+          <div class="text-left">
+            <div class="w-64 border-t border-black pt-2 font-bold">Signature of Supervisor</div>
+            <div class="mt-4 text-sm font-semibold">ID: ______________________</div>
+            <div class="mt-4 text-sm font-semibold">Date: ____________________</div>
+          </div>
         </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row justify-end gap-4 no-print">
+          <button id="printBtn" type="button" onclick="window.print()" class="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-800 font-bold shadow-md transition transform hover:scale-105 flex items-center justify-center gap-2">
+            🖨️ Print Report
+          </button>
+          
+          <button onclick="initiateOtp()" id="otpBtn" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-bold shadow-md transition transform hover:scale-105">
+            Request OTP & Submit
+          </button>
+        </div>
+
       </div>
     </div>
 
     <div id="successPage" class="hidden text-center py-16">
-      <div class="checkmark-circle">
-        <span class="checkmark">✔</span>
-      </div>
+      <div class="checkmark-circle"><span class="checkmark">✔</span></div>
       <h2 class="text-3xl font-bold text-gray-800 mb-2">Success!</h2>
       <p class="text-gray-600 text-lg mb-8">Your inputs have been received successfully.</p>
       <button onclick="location.reload()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-bold shadow-md transition">Review Another Employee</button>
@@ -149,24 +195,38 @@
 
   </div>
 
-  <div id="otpModal" class="modal hidden">
-    <div class="modal-content">
-      <h3 class="text-xl font-bold mb-2 text-gray-800">Enter Verification Code</h3>
+  <div id="instructionModal" class="fixed inset-0 bg-black bg-opacity-70 hidden flex justify-center items-center z-50 backdrop-blur-sm p-4">
+    <div class="bg-white p-6 md:p-8 rounded-xl text-left w-full max-w-lg shadow-2xl">
+      <h3 class="text-xl font-bold mb-4 text-blue-800 border-b pb-2">⚠️ Important Instructions</h3>
+      <ul class="list-decimal pl-5 space-y-3 text-gray-700 mb-6 text-sm md:text-base">
+        <li>Please <strong>Print</strong> the attendance report page and <strong>Sign</strong> by both employee and supervisor after recommending Holiday and Overtime Duty.</li>
+        <li>Make sure entry of the <strong>same information</strong> in the printed copy and online submission.</li>
+      </ul>
+      <div class="text-right">
+        <button onclick="closeInstructions()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-bold shadow transition w-full md:w-auto">
+          Proceed to Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="otpModal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex justify-center items-center z-50 backdrop-blur-sm">
+    <div class="bg-white p-8 rounded-xl text-center w-96 shadow-2xl">
+      <h3 class="text-2xl font-bold mb-2 text-gray-800">Enter Verification Code</h3>
       <p class="text-sm text-gray-500 mb-6">We sent a 6-digit code to your email.</p>
       
       <input type="text" id="otpInput" class="text-center text-4xl mb-6 font-bold border-b-2 border-gray-300 focus:border-blue-500 w-full py-2 tracking-[0.5em] outline-none" maxlength="6" placeholder="000000">
       
       <div id="timer" class="text-red-500 font-bold mb-6 text-lg">02:00</div>
       
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button onclick="document.getElementById('otpModal').classList.add('hidden')" class="w-full sm:w-auto px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
-        <button onclick="verifyOtp()" id="verifyBtn" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow">Verify</button>
+      <div class="flex gap-3 justify-center">
+        <button onclick="document.getElementById('otpModal').classList.add('hidden')" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium">Cancel</button>
+        <button onclick="verifyOtp()" id="verifyBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold shadow">Verify</button>
       </div>
     </div>
   </div>
 
   <script>
-    // --- 1. SEARCH FUNCTION ---
     async function searchEmployee() {
       const id = document.getElementById('searchInput').value;
       if(!id) return alert("Please Enter an Employee ID");
@@ -182,22 +242,22 @@
         document.getElementById('loader').classList.add('hidden');
         if(!res.found) return alert("Employee ID Not Found in Database");
 
-        // Populate Data
+        // Fill Data
         document.getElementById('mainTitle').innerText = "Attendance Review: " + res.monthName;
-        document.getElementById('formTitle').innerText = "Summary: " + res.dateRange;
+        document.getElementById('formTitle').innerText = "Overtime and Holiday Duty Summary: From " + res.dateRange;
         document.getElementById('dispId').innerText = res.info.id;
         document.getElementById('empId').value = res.info.id;
         document.getElementById('dispName').innerText = res.info.name;
         document.getElementById('dispDesig').innerText = res.info.designation;
         document.getElementById('dispDept').innerText = res.info.department;
 
-        // Populate Table
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = res.records.map(r => 
           `<tr class="border-b hover:bg-gray-50"><td class="p-3">${r.date}</td><td>${r.day}</td><td>${r.schIn}</td><td>${r.schOut}</td><td>${r.chkIn}</td><td>${r.chkOut}</td><td>${r.total}</td><td>${r.status}</td></tr>`
         ).join('');
         
-        document.getElementById('resultArea').classList.remove('hidden');
+        // SHOW INSTRUCTION MODAL INSTEAD OF RESULT AREA
+        document.getElementById('instructionModal').classList.remove('hidden');
 
       } catch(e) { 
         document.getElementById('loader').classList.add('hidden');
@@ -205,7 +265,12 @@
       }
     }
 
-    // --- 2. SEND OTP ---
+    // Called by the Instruction Modal button
+    function closeInstructions() {
+      document.getElementById('instructionModal').classList.add('hidden');
+      document.getElementById('resultArea').classList.remove('hidden');
+    }
+
     async function initiateOtp() {
       const email = document.getElementById('supervisorEmail').value;
       const supId = document.getElementById('supervisorId').value;
@@ -246,7 +311,6 @@
       }
     }
 
-    // --- 3. VERIFY OTP ---
     async function verifyOtp() {
       const btn = document.getElementById('verifyBtn');
       btn.innerText = "Verifying..."; btn.disabled = true;
@@ -270,7 +334,6 @@
         const res = await response.json();
 
         if(res.success) {
-          // Success Flow
           document.getElementById('otpModal').classList.add('hidden');
           document.getElementById('resultArea').classList.add('hidden');
           document.getElementById('searchSection').classList.add('hidden');
@@ -286,7 +349,6 @@
       }
     }
 
-    // --- UTILS ---
     let timerInterval;
     function startTimer(duration) {
       let timer = duration;
@@ -309,6 +371,8 @@
         }
       }, 1000);
     }
+    
+    function closeModal() { document.getElementById('otpModal').classList.add('hidden'); clearInterval(timerInterval); }
   </script>
 </body>
 </html>
