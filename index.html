@@ -123,7 +123,7 @@
           <div>
             <label class="block font-bold text-gray-700">Total Overtime Hours</label>
             <span class="sub-label no-print">[সর্বমোট ওভারটাইম ঘন্টা]</span>
-            <input type="text" inputmode="decimal" id="totalOtHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onblur="formatTimeField(this)">
+            <input type="text" id="totalOtHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onchange="formatTimeField(this)">
           </div>
 
           <div>
@@ -135,7 +135,7 @@
           <div>
             <label class="block font-bold text-gray-700">Total Holiday Hours (Max 8/day)</label>
             <span class="sub-label no-print">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]</span>
-            <input type="text" inputmode="decimal" id="totalHolidayHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onblur="formatTimeField(this)">
+            <input type="text" id="totalHolidayHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onchange="formatTimeField(this)">
           </div>
         </div>
 
@@ -272,15 +272,15 @@
       document.getElementById('resultArea').classList.remove('hidden');
     }
 
-    // --- NEW: TIME FORMATTER FUNCTION ---
+    // --- TIME FORMATTER FUNCTION ---
     function formatTimeField(input) {
       let val = input.value.trim();
       if (!val) return;
       
-      // Replace dot with colon (for mobile users)
+      // Replace dot with colon
       val = val.replace('.', ':');
       
-      // If it's a whole number like "52", append ":00"
+      // If purely numeric (e.g. "52"), append ":00"
       if (/^\d+$/.test(val)) {
         val = val + ":00";
       }
@@ -297,7 +297,7 @@
       if(!supId) return alert("Please enter Supervisor ID.");
       if(!email.includes('@')) return alert("Check Supervisor Email.");
 
-      // Validation logic
+      // Validation
       const inputs = ['otDutyDays','totalOtHours','totalHolidayDays','totalHolidayHours'];
       for(let id of inputs) {
         if(document.getElementById(id).value === "") return alert("Please fill all fields (enter 0 if none).");
