@@ -119,10 +119,11 @@
             <span class="sub-label no-print">[সপ্তাহে কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]</span>
             <input type="number" id="otDutyDays" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
+          
           <div>
             <label class="block font-bold text-gray-700">Total Overtime Hours</label>
             <span class="sub-label no-print">[সর্বমোট ওভারটাইম ঘন্টা]</span>
-            <input type="number" id="totalOtHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
+            <input type="text" inputmode="decimal" id="totalOtHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onblur="formatTimeField(this)">
           </div>
 
           <div>
@@ -130,10 +131,11 @@
             <span class="sub-label no-print">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]</span>
             <input type="number" id="totalHolidayDays" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
           </div>
+          
           <div>
             <label class="block font-bold text-gray-700">Total Holiday Hours (Max 8/day)</label>
             <span class="sub-label no-print">[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]</span>
-            <input type="number" id="totalHolidayHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" step="0.5" placeholder="0">
+            <input type="text" inputmode="decimal" id="totalHolidayHours" class="w-full p-2 border border-gray-300 rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0:00" onblur="formatTimeField(this)">
           </div>
         </div>
 
@@ -227,6 +229,7 @@
   </div>
 
   <script>
+    // --- 1. SEARCH FUNCTION ---
     async function searchEmployee() {
       const id = document.getElementById('searchInput').value;
       if(!id) return alert("Please Enter an Employee ID");
@@ -256,33 +259,48 @@
           `<tr class="border-b hover:bg-gray-50"><td class="p-3">${r.date}</td><td>${r.day}</td><td>${r.schIn}</td><td>${r.schOut}</td><td>${r.chkIn}</td><td>${r.chkOut}</td><td>${r.total}</td><td>${r.status}</td></tr>`
         ).join('');
         
-        // SHOW INSTRUCTION MODAL INSTEAD OF RESULT AREA
         document.getElementById('instructionModal').classList.remove('hidden');
 
       } catch(e) { 
         document.getElementById('loader').classList.add('hidden');
-        alert("Connection Error. Please check your internet or try again later.\n\nDetails: " + e); 
+        alert("Connection Error: " + e); 
       }
     }
 
-    // Called by the Instruction Modal button
     function closeInstructions() {
       document.getElementById('instructionModal').classList.add('hidden');
       document.getElementById('resultArea').classList.remove('hidden');
     }
 
+    // --- NEW: TIME FORMATTER FUNCTION ---
+    function formatTimeField(input) {
+      let val = input.value.trim();
+      if (!val) return;
+      
+      // Replace dot with colon (for mobile users)
+      val = val.replace('.', ':');
+      
+      // If it's a whole number like "52", append ":00"
+      if (/^\d+$/.test(val)) {
+        val = val + ":00";
+      }
+      
+      input.value = val;
+    }
+
+    // --- 2. SEND OTP ---
     async function initiateOtp() {
       const email = document.getElementById('supervisorEmail').value;
       const supId = document.getElementById('supervisorId').value;
       
       if(!document.getElementById('termsCheckbox').checked) return alert("Please read the notes and check the agreement box.");
       if(!supId) return alert("Please enter Supervisor ID.");
-      if(!email.includes('@')) return alert("Please enter a valid email address.");
+      if(!email.includes('@')) return alert("Check Supervisor Email.");
 
-      // Check numeric fields
+      // Validation logic
       const inputs = ['otDutyDays','totalOtHours','totalHolidayDays','totalHolidayHours'];
       for(let id of inputs) {
-        if(document.getElementById(id).value === "") return alert("Please fill all numeric fields (enter 0 if none).");
+        if(document.getElementById(id).value === "") return alert("Please fill all fields (enter 0 if none).");
       }
 
       const btn = document.getElementById('otpBtn');
