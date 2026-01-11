@@ -1,0 +1,5 @@
+{
+  "name": "Attendance Review Portal",
+  "description": "Official portal for reviewing employee attendance, holidays, and overtime.",
+  "requestFramePermissions": []
+}
