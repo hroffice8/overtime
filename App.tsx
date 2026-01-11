@@ -176,6 +176,29 @@ export default function App() {
     }
   };
 
+  // NEW: Formatting logic on blur for time fields
+  const handleTimeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    if (!value) return;
+
+    let formatted = value;
+    // Handle integer entry (e.g., "24" -> "24:00")
+    if (/^\d+$/.test(value)) {
+      formatted = `${value}:00`;
+    } 
+    // Handle trailing colon (e.g., "24:" -> "24:00")
+    else if (value.endsWith(':')) {
+      formatted = `${value}00`;
+    }
+    // Handle single digit minutes (e.g., "24:3" -> "24:03") to ensure [h]:mm format
+    else if (/^\d+:\d$/.test(value)) {
+      const [h, m] = value.split(':');
+      formatted = `${h}:${m.padStart(2, '0')}`;
+    }
+
+    setForm(prev => ({ ...prev, [id]: formatted }));
+  };
+
   const handlePrint = (e: React.MouseEvent) => {
     e.preventDefault();
     // Use a small timeout to ensure the UI is not busy
@@ -320,7 +343,8 @@ export default function App() {
                   label: `Total Overtime Hours in ${data.monthName || 'December 2025'}`, 
                   sub: `[${data.monthName || 'ডিসেম্বর ২০২৫'} মাসে সর্বমোট ওভারটাইম ঘন্টা]`,
                   type: 'text',
-                  placeholder: 'h:mm'
+                  placeholder: 'h:mm',
+                  useTimeBlur: true
                 },
                 { 
                   id: 'totalHolidayDays', 
@@ -334,7 +358,8 @@ export default function App() {
                   label: 'Total Holiday Hours (Maximum 8 hours per day)', 
                   sub: '[ দিনে সর্বোচ্চ ৮ ঘন্টা হিসাবে এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]',
                   type: 'text',
-                  placeholder: 'h:mm'
+                  placeholder: 'h:mm',
+                  useTimeBlur: true
                 },
               ].map((field) => (
                 <div key={field.id} className="space-y-2">
@@ -345,6 +370,7 @@ export default function App() {
                     id={field.id}
                     value={(form as any)[field.id]}
                     onChange={handleInputChange}
+                    onBlur={field.useTimeBlur ? handleTimeBlur : undefined}
                     className="w-full p-3 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-[#006a4e]/10 focus:border-[#006a4e] outline-none font-bold text-lg" 
                     placeholder={field.placeholder || "0"} 
                   />
