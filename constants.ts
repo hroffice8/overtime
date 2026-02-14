@@ -1,4 +1,4 @@
-export const API_URL = "https://script.google.com/macros/s/AKfycbzFvjfUXA9seOb8x1y7zCC_F-reZbTTF_1tTiRPMPk9p7SmV-ZD1YRDpNzNsXolSEdBEQ/exec";
+export const API_URL = "https://script.google.com/macros/s/AKfycbyGvPes-Dg7Mzh2_Sr_NbZ_AA3fD2NQTka5n9EeLAQ23kFHorDMoWxAdthLStwHa3H0XA/exec";
 
 export const APP_TITLE = "DIU Holiday and Overtime Duty Review Portal";
 export const APP_SUBTITLE = "Overtime and Holiday Duty Summary";
