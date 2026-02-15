@@ -228,17 +228,17 @@ export default function App() {
   return (
     <div className="max-w-4xl mx-auto bg-white p-4 md:p-8 rounded-xl shadow-2xl my-4 container">
       
-      {/* BRANDED HEADER (SEARCH & REPORT) */}
-      {view !== 'SUCCESS' && (
-        <div className="mb-8">
-           {/* CENTERED TITLE */}
-           <div className="text-center border-b-4 border-[#006a4e] pb-4 mb-6">
-              <h1 id="mainTitle" className="text-2xl md:text-3xl font-extrabold text-[#006a4e] uppercase tracking-wide">
-                {view === 'REPORT' ? `Holiday and Overtime Review: ${data?.monthName}` : APP_TITLE}
-              </h1>
-           </div>
-        </div>
-      )}
+{/* BRANDED HEADER (SEARCH & REPORT) */}
+{view !== 'SUCCESS' && (
+  <div className="mb-8">
+     {/* CENTERED TITLE */}
+     <div className="text-center border-b-4 border-[#006a4e] pb-4 mb-6">
+        <h1 id="mainTitle" className="text-2xl md:text-3xl font-extrabold text-[#006a4e] uppercase tracking-wide">
+          {view === 'REPORT' ? `Holiday and Overtime Review: January 2026` : APP_TITLE}
+        </h1>
+     </div>
+  </div>
+)}
 
       {/* SEARCH VIEW */}
       {view === 'SEARCH' && (
