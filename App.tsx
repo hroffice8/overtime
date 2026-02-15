@@ -485,7 +485,7 @@ export default function App() {
           </div>
         </div>
       )}
-
+      
       {/* SUCCESS STATE */}
       {view === 'SUCCESS' && (
         <div id="successPage" className="text-center py-20">
