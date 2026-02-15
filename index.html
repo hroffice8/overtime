@@ -73,3 +73,71 @@
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIU Attendance Review</title>
+
+    <style>
+      @media print {
+        /* Set Page Size and Narrow Margins */
+        @page {
+          size: A4;
+          margin: 5mm; /* This forces narrow margins */
+        }
+
+        /* Force the app to use the full page width */
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          font-size: 10pt; /* Smaller font helps fit content on one page */
+          background: white !important;
+        }
+
+        /* Hide buttons and instructions during printing */
+        .no-print, 
+        button, 
+        #otpBtn, 
+        #printBtn, 
+        .sub-label,
+        .animate-pulse {
+          display: none !important;
+        }
+
+        /* Remove large shadows and rounded corners to save space */
+        .shadow-2xl, .shadow-xl, .shadow-lg, .rounded-xl, .rounded-3xl {
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          border: 1px solid #ccc !important;
+        }
+
+        /* Force container to fill the A4 width */
+        .container, .max-w-4xl {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        /* Ensure signatures appear at the bottom of the data */
+        #printSignatures {
+          display: flex !important;
+          margin-top: 20px !important;
+        }
+
+        /* Prevent the table from splitting awkwardly */
+        table {
+          page-break-inside: avoid;
+          width: 100% !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
