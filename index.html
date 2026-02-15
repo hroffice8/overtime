@@ -31,11 +31,11 @@
       }
       .checkmark { color: #16a34a; font-size: 50px; }
 
-      /* --- A4 PRINT LAYOUT (NARROW) --- */
+      /* --- A4 PRINT LAYOUT (ONE-PAGE OPTIMIZATION) --- */
       @media print {
         @page { 
           size: A4; 
-          margin: 5mm; /* Forced Narrow Margins */
+          margin: 5mm !important; /* Forces narrow margins for A4 */
         }
         
         html, body { 
@@ -44,21 +44,24 @@
           margin: 0 !important; 
           -webkit-print-color-adjust: exact; 
           font-size: 10pt;
+          /* Slightly scale down to ensure it fits one page */
+          zoom: 0.95; 
         }
         
-        /* Hide non-essential UI elements */
+        /* Hide all non-essential web elements */
         #searchSection, #otpBtn, #printBtn, #termsCheckboxLabel, 
         #loader, .no-print, #instructionModal, #otpModal, button, 
-        .animate-pulse, #supervisorInputSection {
+        .animate-pulse, #supervisorInputSection, #termsCheckboxLabel {
           display: none !important;
         }
         
-        /* Force Signature Area Visibility */
+        /* Ensure Signatures are visible and positioned correctly */
         #printSignatures { 
           display: flex !important; 
           visibility: visible !important;
-          margin-top: 40px !important; 
+          margin-top: 30px !important; 
           justify-content: space-between !important;
+          page-break-before: avoid;
         }
 
         .container, .max-w-4xl { 
@@ -68,29 +71,31 @@
           padding: 0 !important; 
           margin: 0 !important; 
           border: none !important;
+          background-color: white !important;
         }
         
+        /* Simplify background colors for printers */
         .bg-gray-50, .bg-blue-50, .bg-red-50, .bg-white { 
           background-color: white !important; 
           border: 1px solid #eee !important; 
         }
         
-        /* Table Styling for Print */
+        /* Compact Table for Print */
         table { 
-          font-size: 11px !important; 
+          font-size: 10px !important; 
           width: 100% !important; 
           border-collapse: collapse !important; 
           page-break-inside: avoid;
         }
-        th, td { border: 1px solid #ddd !important; padding: 6px !important; }
-        th { background-color: #eee !important; color: black !important; }
+        th, td { border: 1px solid #ddd !important; padding: 4px !important; }
+        th { background-color: #f3f4f6 !important; color: black !important; }
 
         #mainTitle { 
           text-align: center !important; 
-          color: black !important; 
-          font-size: 22px !important; 
-          margin-bottom: 15px !important; 
-          border-bottom: 2px solid black !important; 
+          color: #006a4e !important; 
+          font-size: 20px !important; 
+          margin-bottom: 10px !important; 
+          border-bottom: 2px solid #006a4e !important; 
         }
       }
     </style>
