@@ -31,40 +31,32 @@
       }
       .checkmark { color: #16a34a; font-size: 50px; }
 
-      /* --- A4 PRINT LAYOUT (ONE-PAGE OPTIMIZATION) --- */
+      /* --- A4 PRINT LAYOUT (FIXED GAP ISSUE) --- */
       @media print {
         @page { 
           size: A4; 
-          margin: 5mm !important; /* Forces narrow margins for A4 */
+          margin: 10mm !important; /* Standardized narrow margin */
         }
         
         html, body { 
           background-color: white !important; 
+          height: auto !important; /* Fixes the 1-page gap issue */
+          min-height: initial !important;
           padding: 0 !important; 
           margin: 0 !important; 
           -webkit-print-color-adjust: exact; 
-          font-size: 10pt;
-          /* Slightly scale down to ensure it fits one page */
-          zoom: 0.95; 
+          font-size: 9pt; /* Slightly smaller for better fit */
         }
         
-        /* Hide all non-essential web elements */
+        /* Hide all non-report elements */
         #searchSection, #otpBtn, #printBtn, #termsCheckboxLabel, 
         #loader, .no-print, #instructionModal, #otpModal, button, 
         .animate-pulse, #supervisorInputSection, #termsCheckboxLabel {
           display: none !important;
         }
         
-        /* Ensure Signatures are visible and positioned correctly */
-        #printSignatures { 
-          display: flex !important; 
-          visibility: visible !important;
-          margin-top: 30px !important; 
-          justify-content: space-between !important;
-          page-break-before: avoid;
-        }
-
-        .container, .max-w-4xl { 
+        /* Force container to collapse and use full width */
+        #root, .container, .max-w-4xl { 
           box-shadow: none !important; 
           max-width: 100% !important; 
           width: 100% !important; 
@@ -72,30 +64,43 @@
           margin: 0 !important; 
           border: none !important;
           background-color: white !important;
+          display: block !important; /* Prevents flex-center gaps */
+          height: auto !important;
         }
         
-        /* Simplify background colors for printers */
-        .bg-gray-50, .bg-blue-50, .bg-red-50, .bg-white { 
+        /* Remove decorative backgrounds for print clarity */
+        .bg-gray-50, .bg-blue-50, .bg-red-50, .bg-white, .bg-emerald-50 { 
           background-color: white !important; 
-          border: 1px solid #eee !important; 
+          border: 1px solid #ddd !important; 
         }
-        
-        /* Compact Table for Print */
+
+        /* Compact Table Layout */
         table { 
-          font-size: 10px !important; 
+          font-size: 9pt !important; 
           width: 100% !important; 
           border-collapse: collapse !important; 
+          margin-top: 10px !important;
+        }
+        th, td { border: 1px solid #ccc !important; padding: 3px 6px !important; }
+        th { background-color: #f1f1f1 !important; color: black !important; }
+
+        /* Signature Area */
+        #printSignatures { 
+          display: flex !important; 
+          visibility: visible !important;
+          margin-top: 40px !important; 
+          justify-content: space-between !important;
           page-break-inside: avoid;
         }
-        th, td { border: 1px solid #ddd !important; padding: 4px !important; }
-        th { background-color: #f3f4f6 !important; color: black !important; }
 
+        /* Title Styling */
         #mainTitle { 
           text-align: center !important; 
           color: #006a4e !important; 
-          font-size: 20px !important; 
-          margin-bottom: 10px !important; 
+          font-size: 18pt !important; 
+          margin-bottom: 5px !important; 
           border-bottom: 2px solid #006a4e !important; 
+          padding-bottom: 5px !important;
         }
       }
     </style>
