@@ -298,7 +298,7 @@ export default function App() {
         </div>
       )}
 
-      {/* REPORT VIEW */}
+{/* REPORT VIEW */}
       {view === 'REPORT' && data && (
         <div id="resultArea">
           <div className="bg-[#f0f9f6] p-4 rounded-lg mb-6 border border-[#006a4e]/20 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -344,37 +344,37 @@ export default function App() {
               Review Summary: {data.info?.name} - {data.dateRange}
             </h3>
             <p className="text-sm text-[#006a4e] mb-6 font-bold leading-relaxed">
-              Common Holiday Count = 03 Days, Common Weekend = 04 Days <br /> Weekdays/Working Days = 24 Days
+              Common Weekend = 05 Days <br /> Weekdays/Working Days = 26 Days
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {[
                 { 
                   id: 'otDutyDays', 
-                  label: `Total Overtime Duty Days in ${data.monthName || 'December 2025'}`, 
-                  sub: `[${data.monthName || 'ডিসেম্বর ২০২৫'} মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
+                  label: `Total Overtime Duty Days in January 2026`, 
+                  sub: `[January 2026 মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
                   type: 'text',
                   placeholder: 'e.g. 5'
                 },
                 { 
                   id: 'totalOtHours', 
-                  label: `Total Overtime Hours in ${data.monthName || 'December 2025'}`, 
-                  sub: `[${data.monthName || 'ডিসেম্বর ২০২৫'} মাসে সর্বমোট ওভারটাইম ঘন্টা]`,
+                  label: `Total Overtime Hours in January 2026`, 
+                  sub: `[January 2026 মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
                 },
                 { 
                   id: 'totalHolidayDays', 
-                  label: 'Total Holiday/Weekend Days', 
-                  sub: '[এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
+                  label: 'Total Holiday/Weekend Duty Days in January 2026', 
+                  sub: '[January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
                   type: 'text',
                   placeholder: 'e.g. 3'
                 },
                 { 
                   id: 'totalHolidayHours', 
-                  label: 'Total Holiday Hours (Maximum 8 hours per day)', 
-                  sub: '[ দিনে সর্বোচ্চ ৮ ঘন্টা হিসাবে এই মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]',
+                  label: 'Total Holiday/Weekend Duty Hours (Maximum 8 hours per day)', 
+                  sub: '[দিনে সর্বোচ্চ ৮ ঘন্টা হিসাবে January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]',
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
@@ -457,25 +457,30 @@ export default function App() {
                </p>
             </div>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-end gap-6 no-print">
-              <button 
-                id="printBtn"
-                type="button"
-                onClick={handlePrint} 
-                className="bg-gray-800 text-white px-10 py-4 rounded-xl hover:bg-black font-black text-lg shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-3"
-              >
-                🖨️ Print Report
-              </button>
-              
-              <button 
-                id="otpBtn"
-                type="button"
-                onClick={initiateOtp} 
-                disabled={otpLoading}
-                className="bg-[#16a34a] text-white px-12 py-4 rounded-xl hover:bg-[#11803a] font-black text-lg shadow-xl transition transform hover:scale-105 disabled:opacity-50"
-              >
-                {otpLoading ? "Sending Code..." : "Request OTP & Submit"}
-              </button>
+            <div className="mt-8 flex flex-col items-end gap-2 no-print">
+              <p className="text-red-600 font-bold text-sm italic">
+                * একজন কর্মীর জন্য একাধিকবার এন্ট্রি করলে সর্বশেষ এন্ট্রি গণ্য হবে
+              </p>
+              <div className="flex flex-col sm:flex-row justify-end gap-6 w-full">
+                <button 
+                  id="printBtn"
+                  type="button"
+                  onClick={handlePrint} 
+                  className="bg-gray-800 text-white px-10 py-4 rounded-xl hover:bg-black font-black text-lg shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                  🖨️ Print Report
+                </button>
+                
+                <button 
+                  id="otpBtn"
+                  type="button"
+                  onClick={initiateOtp} 
+                  disabled={otpLoading}
+                  className="bg-[#16a34a] text-white px-12 py-4 rounded-xl hover:bg-[#11803a] font-black text-lg shadow-xl transition transform hover:scale-105 disabled:opacity-50"
+                >
+                  {otpLoading ? "Sending Code..." : "Request OTP & Submit"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
