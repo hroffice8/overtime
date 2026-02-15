@@ -351,14 +351,14 @@ export default function App() {
               {[
                 { 
                   id: 'otDutyDays', 
-                  label: `Total Overtime Duty Days in January 2026`, 
+                  label: `1. Total Overtime Duty Days in January 2026`, 
                   sub: `[January 2026 মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
                   type: 'text',
                   placeholder: 'e.g. 5'
                 },
                 { 
                   id: 'totalOtHours', 
-                  label: `Total Overtime Hours in January 2026`, 
+                  label: `2. Total Overtime Hours in January 2026`, 
                   sub: `[January 2026 মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
                   type: 'text',
                   placeholder: 'h:mm',
@@ -366,14 +366,14 @@ export default function App() {
                 },
                 { 
                   id: 'totalHolidayDays', 
-                  label: 'Total Holiday/Weekend Duty Days in January 2026', 
+                  label: '3. Total Holiday/Weekend Duty Days in January 2026', 
                   sub: '[January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
                   type: 'text',
                   placeholder: 'e.g. 3'
                 },
                 { 
                   id: 'totalHolidayHours', 
-                  label: 'Total Holiday/Weekend Duty Hours (Maximum 8 hours per day)', 
+                  label: '4.  Total Holiday/Weekend Duty Hours (Maximum 8 hours per day)', 
                   sub: '[দিনে সর্বোচ্চ ৮ ঘন্টা হিসাবে January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]',
                   type: 'text',
                   placeholder: 'h:mm',
