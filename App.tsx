@@ -87,27 +87,45 @@ export default function App() {
     const maxMonthDays = getDaysInMonth(monthYear);
     const maxHolidayDays = 7; 
 
+    // 1. Basic Validations
     if (!agreed) return alert("Please read the notes and check the agreement box.");
     if (!form.supId) return alert("Please enter Supervisor ID.");
     if (!email.includes('@')) return alert("Please enter a valid official email address.");
-
     if (!isInteger(form.otDutyDays)) return alert("Overtime Duty Days must be an integer.");
     if (parseInt(form.otDutyDays) > maxMonthDays) return alert(`Overtime Duty Days cannot exceed ${maxMonthDays} days.`);
-
     if (!validateTimeFormat(form.totalOtHours)) return alert("Overtime Hours must be in [h]:mm format (e.g., 10:30).");
-
     if (!isInteger(form.totalHolidayDays)) return alert("Holiday/Weekend Days must be an integer.");
     if (parseInt(form.totalHolidayDays) > maxHolidayDays) return alert(`Holiday/Weekend Days cannot exceed ${maxHolidayDays} days.`);
-
     if (!validateTimeFormat(form.totalHolidayHours)) return alert("Holiday Hours must be in [h]:mm format (e.g., 8:00).");
 
     setOtpLoading(true);
+
     try {
+      // 2. NEW: Duplicate Check BEFORE sending OTP
+      const checkResponse = await fetch(`${API_URL}?action=checkDuplicate&id=${form.empId}`);
+      const checkRes = await checkResponse.json();
+
+      if (checkRes.exists) {
+        const confirmOverwrite = window.confirm(
+          `⚠️ WARNING: DUPLICATE ENTRY\n\n` +
+          `An entry for ID ${form.empId} already exists.\n` +
+          `Last submitted by: ${checkRes.previousUser}\n\n` +
+          `Do you want to REPLACE the existing record with this new data?`
+        );
+        
+        if (!confirmOverwrite) {
+          setOtpLoading(false);
+          return; // Stop the process if they click 'Cancel'
+        }
+      }
+
+      // 3. Proceed to send OTP if no duplicate OR user clicked 'OK'
       const response = await fetch(API_URL, {
         method: 'POST',
         body: JSON.stringify({ action: 'sendOtp', email: email })
       });
       const res = await response.json();
+      
       setOtpLoading(false);
       if (res.success) {
         setShowOtpModal(true);
