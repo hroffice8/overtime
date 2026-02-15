@@ -1,143 +1,103 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Attendance Review Portal</title>
+    <title>DIU Attendance Review Portal</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-      body { background-color: #f3f4f6; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-      
-      /* CUSTOM STYLES */
-      .sub-label { display: block; font-weight: normal; color: #006a4e; font-size: 13px; margin-bottom: 4px; }
-      .checkmark-circle { width: 100px; height: 100px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+      /* --- WEB UI STYLES --- */
+      body { 
+        background-color: #f3f4f6; 
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      }
+      .sub-label { 
+        display: block; 
+        font-weight: normal; 
+        color: #006a4e; 
+        font-size: 13px; 
+        margin-bottom: 4px; 
+      }
+      .checkmark-circle { 
+        width: 100px; height: 100px; 
+        background: #dcfce7; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        margin: 0 auto 20px; 
+      }
       .checkmark { color: #16a34a; font-size: 50px; }
-  
-      /* =========================================
-         PRINT STYLES (A4 Layout)
-         ========================================= */
+
+      /* --- A4 PRINT LAYOUT (NARROW) --- */
       @media print {
-        @page { size: A4; margin: 15mm; }
-        html, body { background-color: white !important; padding: 0 !important; margin: 0 !important; -webkit-print-color-adjust: exact; }
+        @page { 
+          size: A4; 
+          margin: 5mm; /* Forced Narrow Margins */
+        }
         
-        #searchSection, #otpBtn, #printBtn, #termsCheckboxLabel, #loader, .no-print, #instructionModal, #otpModal, button {
+        html, body { 
+          background-color: white !important; 
+          padding: 0 !important; 
+          margin: 0 !important; 
+          -webkit-print-color-adjust: exact; 
+          font-size: 10pt;
+        }
+        
+        /* Hide non-essential UI elements */
+        #searchSection, #otpBtn, #printBtn, #termsCheckboxLabel, 
+        #loader, .no-print, #instructionModal, #otpModal, button, 
+        .animate-pulse, #supervisorInputSection {
           display: none !important;
         }
         
-        #supervisorInputSection { display: none !important; }
-        
-        /* Force signature area visibility despite 'hidden' utility class */
+        /* Force Signature Area Visibility */
         #printSignatures { 
           display: flex !important; 
           visibility: visible !important;
-          margin-top: 60px !important; 
+          margin-top: 40px !important; 
           justify-content: space-between !important;
         }
-  
-        .container { 
+
+        .container, .max-w-4xl { 
           box-shadow: none !important; 
           max-width: 100% !important; 
           width: 100% !important; 
           padding: 0 !important; 
           margin: 0 !important; 
           border: none !important;
-          background-color: white !important;
         }
         
-        .bg-gray-50, .bg-blue-50, .bg-red-50, .bg-white { background-color: white !important; border: 1px solid #eee !important; }
+        .bg-gray-50, .bg-blue-50, .bg-red-50, .bg-white { 
+          background-color: white !important; 
+          border: 1px solid #eee !important; 
+        }
         
-        input { border: none !important; border-bottom: 1px solid #333 !important; padding: 0 !important; margin-top: 10px !important; font-weight: bold !important; }
-        
-        table { font-size: 11px !important; width: 100% !important; border-collapse: collapse !important; }
+        /* Table Styling for Print */
+        table { 
+          font-size: 11px !important; 
+          width: 100% !important; 
+          border-collapse: collapse !important; 
+          page-break-inside: avoid;
+        }
         th, td { border: 1px solid #ddd !important; padding: 6px !important; }
         th { background-color: #eee !important; color: black !important; }
 
-        #mainTitle { text-align: center !important; color: black !important; font-size: 24px !important; margin-bottom: 20px !important; border-bottom: 2px solid black !important; }
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body class="bg-gray-100 p-2 md:p-6">
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DIU Attendance Review</title>
-
-    <style>
-      @media print {
-        /* Set Page Size and Narrow Margins */
-        @page {
-          size: A4;
-          margin: 5mm; /* This forces narrow margins */
-        }
-
-        /* Force the app to use the full page width */
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-          font-size: 10pt; /* Smaller font helps fit content on one page */
-          background: white !important;
-        }
-
-        /* Hide buttons and instructions during printing */
-        .no-print, 
-        button, 
-        #otpBtn, 
-        #printBtn, 
-        .sub-label,
-        .animate-pulse {
-          display: none !important;
-        }
-
-        /* Remove large shadows and rounded corners to save space */
-        .shadow-2xl, .shadow-xl, .shadow-lg, .rounded-xl, .rounded-3xl {
-          box-shadow: none !important;
-          border-radius: 0 !important;
-          border: 1px solid #ccc !important;
-        }
-
-        /* Force container to fill the A4 width */
-        .container, .max-w-4xl {
-          width: 100% !important;
-          max-width: 100% !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-
-        /* Ensure signatures appear at the bottom of the data */
-        #printSignatures {
-          display: flex !important;
-          margin-top: 20px !important;
-        }
-
-        /* Prevent the table from splitting awkwardly */
-        table {
-          page-break-inside: avoid;
-          width: 100% !important;
+        #mainTitle { 
+          text-align: center !important; 
+          color: black !important; 
+          font-size: 22px !important; 
+          margin-bottom: 15px !important; 
+          border-bottom: 2px solid black !important; 
         }
       }
     </style>
   </head>
-  <body>
+  <body class="bg-gray-100 p-2 md:p-6">
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
