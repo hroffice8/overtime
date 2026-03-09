@@ -233,7 +233,7 @@ export default function App() {
            {/* CENTERED TITLE */}
            <div className="text-center border-b-4 border-[#006a4e] pb-4 mb-6">
               <h1 id="mainTitle" className="text-2xl md:text-3xl font-extrabold text-[#006a4e] uppercase tracking-wide">
-                {view === 'REPORT' ? `Holiday and Overtime Review: January 2026` : APP_TITLE}
+                {view === 'REPORT' ? `Holiday and Overtime Review: February 2026` : APP_TITLE}
               </h1>
            </div>
         </div>
@@ -343,37 +343,37 @@ export default function App() {
               Review Summary: {data.info?.name} - {data.dateRange}
             </h3>
             <p className="text-sm text-[#006a4e] mb-6 font-bold leading-relaxed">
-              Common Weekend = 05 Days <br /> Weekdays/Working Days = 26 Days
+              Common Weekend = 04 Days <br /> Holiday = 04 Days <br />Weekdays/Working Days = 20 Days
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {[
                 { 
                   id: 'otDutyDays', 
-                  label: `1. Total Overtime Duty Days in January 2026`, 
-                  sub: `[January 2026 মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
+                  label: `1. Total Overtime Duty Days in February 2026`, 
+                  sub: `[February 2026 মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
                   type: 'text',
                   placeholder: 'e.g. 5'
                 },
                 { 
                   id: 'totalOtHours', 
-                  label: `2. Total Overtime Hours in January 2026`, 
-                  sub: `[January 2026 মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
+                  label: `2. Total Overtime Hours in February 2026`, 
+                  sub: `[February 2026 মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
                 },
                 { 
                   id: 'totalHolidayDays', 
-                  label: '3. Total Holiday/Weekend Duty Days in January 2026', 
-                  sub: '[January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
+                  label: '3. Total Holiday/Weekend Duty Days in February 2026', 
+                  sub: '[February 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
                   type: 'text',
                   placeholder: 'e.g. 3'
                 },
                 { 
                   id: 'totalHolidayHours', 
-                  label: '4.  Total Holiday/Weekend Duty Hours (Maximum 8 hours per day)', 
-                  sub: '[দিনে সর্বোচ্চ ৮ ঘন্টা হিসাবে January 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা?]',
+                  label: '4.  Total Holiday/Weekend Duty Hours (8 hours/day for usual days, 6:30 Hours/day for Ramadan)', 
+                  sub: '[February 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা? (সাধারণ শিফট ৮ ঘন্টা/দিন এবং রমজান মাসে ৬ঃ৩০ ঘন্টা/দিন হিসেবে]',
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
