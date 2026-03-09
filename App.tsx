@@ -82,9 +82,9 @@ export default function App() {
   };
 
   const initiateOtp = async () => {
-    const monthYear = data?.monthName || 'December 2025';
+    const monthYear = data?.monthName || 'February 2026';
     const maxMonthDays = getDaysInMonth(monthYear);
-    const maxHolidayDays = 7; 
+    const maxHolidayDays = 15; 
 
     // 1. Basic Validations
     if (!agreed) return alert("Please read the notes and check the agreement box.");
