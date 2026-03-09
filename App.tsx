@@ -91,10 +91,10 @@ export default function App() {
     if (!form.supId) return alert("Please enter Supervisor ID.");
     if (!email.includes('@')) return alert("Please enter a valid official email address.");
     if (!isInteger(form.otDutyDays)) return alert("Overtime Duty Days must be an integer.");
-    if (parseInt(form.otDutyDays) > maxMonthDays) return alert(`Overtime Duty Days cannot exceed ${maxMonthDays} days.`);
+    if (parseInt(form.otDutyDays) > maxMonthDays) return alert(`Overtime Duty Days cannot exceed 31 days.`);
     if (!validateTimeFormat(form.totalOtHours)) return alert("Overtime Hours must be in [h]:mm format (e.g., 10:30).");
     if (!isInteger(form.totalHolidayDays)) return alert("Holiday/Weekend Days must be an integer.");
-    if (parseInt(form.totalHolidayDays) > maxHolidayDays) return alert(`Holiday/Weekend Days cannot exceed ${maxHolidayDays} days.`);
+    if (parseInt(form.totalHolidayDays) > maxHolidayDays) return alert(`Holiday/Weekend Days cannot exceed 15 days.`);
     if (!validateTimeFormat(form.totalHolidayHours)) return alert("Holiday Hours must be in [h]:mm format (e.g., 8:00).");
 
     setOtpLoading(true);
