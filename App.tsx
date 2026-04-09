@@ -1,8 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { API_URL, APP_TITLE } from './constants';
-import { SearchResult, FormData } from './types';
 
+// --- CONSTANTS & TYPES ---
+// Replace this with your actual Google Apps Script Web App URL
+const API_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; 
+const APP_TITLE = "DIU Master Automation Engine";
 const TUTORIAL_URL = "https://drive.google.com/file/d/1pO-BADnvdbjUqSkUPrlLnFG1EeQJxbZl/view";
+
+interface SearchResult {
+  found: boolean;
+  info?: {
+    id: string;
+    name: string;
+    designation: string;
+    department: string;
+  };
+  records?: {
+    date: string;
+    day: string;
+    schIn: string;
+    schOut: string;
+    chkIn: string;
+    chkOut: string;
+    total: string;
+    status: string;
+  }[];
+  monthName?: string;
+  dateRange?: string;
+}
+
+interface FormData {
+  empId: string;
+  supId: string;
+  otDutyDays: string;
+  totalOtHours: string;
+  totalHolidayDays: string;
+  totalHolidayHours: string;
+}
+
+interface SystemConfig {
+  month: string;
+  year: string;
+  weekend: string;
+  holiday: string;
+  commonShift: string;
+  specialShift: string;
+}
 
 // --- MAIN COMPONENT ---
 export default function App() {
@@ -11,6 +53,9 @@ export default function App() {
   const [empId, setEmpId] = useState('');
   const [data, setData] = useState<SearchResult | null>(null);
   
+  // Dynamic Configuration State
+  const [sysConfig, setSysConfig] = useState<SystemConfig | null>(null);
+
   // Modal for OTP
   const [showOtpModal, setShowOtpModal] = useState(false);
 
@@ -32,8 +77,23 @@ export default function App() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
 
-  // --- VALIDATION HELPERS ---
+  // --- FETCH CONFIGURATION ON LOAD ---
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch(`${API_URL}?action=getConfig`);
+        const res = await response.json();
+        if (res.success) {
+          setSysConfig(res.data);
+        }
+      } catch (e) {
+        console.error("Failed to load system config", e);
+      }
+    };
+    fetchConfig();
+  }, []);
 
+  // --- VALIDATION HELPERS ---
   const validateTimeFormat = (val: string) => {
     // Matches [h]:mm where mm is 00-59
     return /^\d+:[0-5]\d$/.test(val);
@@ -43,14 +103,18 @@ export default function App() {
     return /^\d+$/.test(val);
   };
 
-  const getDaysInMonth = (monthYearStr: string) => {
-    if (monthYearStr.includes('February')) return 28;
-    if (monthYearStr.includes('April') || monthYearStr.includes('June') || monthYearStr.includes('September') || monthYearStr.includes('November')) return 30;
+  const getDaysInMonth = (monthStr: string, yearStr: string) => {
+    const m = monthStr.toLowerCase();
+    if (m.includes('february')) {
+      const y = parseInt(yearStr);
+      // Leap year check
+      return (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28;
+    }
+    if (['april', 'june', 'september', 'november'].some(x => m.includes(x))) return 30;
     return 31;
   };
 
   // --- ACTIONS ---
-
   const handleSearch = async () => {
     if (!empId.trim()) return alert("Please Enter an Employee ID");
     
@@ -82,8 +146,7 @@ export default function App() {
   };
 
   const initiateOtp = async () => {
-    const monthYear = data?.monthName || 'February 2026';
-    const maxMonthDays = getDaysInMonth(monthYear);
+    const maxMonthDays = sysConfig ? getDaysInMonth(sysConfig.month, sysConfig.year) : 31;
     const maxHolidayDays = 15; 
 
     // 1. Basic Validations
@@ -91,7 +154,7 @@ export default function App() {
     if (!form.supId) return alert("Please enter Supervisor ID.");
     if (!email.includes('@')) return alert("Please enter a valid official email address.");
     if (!isInteger(form.otDutyDays)) return alert("Overtime Duty Days must be an integer.");
-    if (parseInt(form.otDutyDays) > maxMonthDays) return alert(`Overtime Duty Days cannot exceed 31 days.`);
+    if (parseInt(form.otDutyDays) > maxMonthDays) return alert(`Overtime Duty Days cannot exceed ${maxMonthDays} days for this month.`);
     if (!validateTimeFormat(form.totalOtHours)) return alert("Overtime Hours must be in [h]:mm format (e.g., 10:30).");
     if (!isInteger(form.totalHolidayDays)) return alert("Holiday/Weekend Days must be an integer.");
     if (parseInt(form.totalHolidayDays) > maxHolidayDays) return alert(`Holiday/Weekend Days cannot exceed 15 days.`);
@@ -100,7 +163,7 @@ export default function App() {
     setOtpLoading(true);
 
     try {
-      // 2. NEW: Duplicate Check BEFORE sending OTP
+      // 2. Duplicate Check BEFORE sending OTP
       const checkResponse = await fetch(`${API_URL}?action=checkDuplicate&id=${form.empId}`);
       const checkRes = await checkResponse.json();
 
@@ -177,15 +240,11 @@ export default function App() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     
-    // Strict pattern matching for inputs
     if (id === 'totalOtHours' || id === 'totalHolidayHours') {
-      // Allow only numbers and colons
       const filtered = value.replace(/[^0-9:]/g, '');
-      // Prevent more than one colon
       if ((filtered.match(/:/g) || []).length > 1) return;
       setForm(prev => ({ ...prev, [id]: filtered }));
     } else if (id === 'otDutyDays' || id === 'totalHolidayDays') {
-      // Allow only numbers (integers)
       const filtered = value.replace(/[^0-9]/g, '');
       setForm(prev => ({ ...prev, [id]: filtered }));
     } else {
@@ -193,21 +252,17 @@ export default function App() {
     }
   };
 
-  // NEW: Formatting logic on blur for time fields
   const handleTimeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     if (!value) return;
 
     let formatted = value;
-    // Handle integer entry (e.g., "24" -> "24:00")
     if (/^\d+$/.test(value)) {
       formatted = `${value}:00`;
     } 
-    // Handle trailing colon (e.g., "24:" -> "24:00")
     else if (value.endsWith(':')) {
       formatted = `${value}00`;
     }
-    // Handle single digit minutes (e.g., "24:3" -> "24:03") to ensure [h]:mm format
     else if (/^\d+:\d$/.test(value)) {
       const [h, m] = value.split(':');
       formatted = `${h}:${m.padStart(2, '0')}`;
@@ -218,22 +273,23 @@ export default function App() {
 
   const handlePrint = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Use a small timeout to ensure the UI is not busy
     setTimeout(() => {
       window.print();
     }, 150);
   };
 
+  // Helper variables for dynamic text
+  const targetMonthText = sysConfig ? `${sysConfig.month} ${sysConfig.year}` : 'Current Month';
+
   return (
     <div className="max-w-4xl mx-auto bg-white p-4 md:p-8 rounded-xl shadow-2xl my-4 container">
       
-{/* BRANDED HEADER (SEARCH & REPORT) */}
+      {/* BRANDED HEADER */}
       {view !== 'SUCCESS' && (
         <div className="mb-8">
-           {/* CENTERED TITLE */}
            <div className="text-center border-b-4 border-[#006a4e] pb-4 mb-6">
               <h1 id="mainTitle" className="text-2xl md:text-3xl font-extrabold text-[#006a4e] uppercase tracking-wide">
-                {view === 'REPORT' ? `Holiday and Overtime Review: February 2026` : APP_TITLE}
+                {view === 'REPORT' ? `Holiday and Overtime Review: ${targetMonthText}` : APP_TITLE}
               </h1>
            </div>
         </div>
@@ -265,7 +321,7 @@ export default function App() {
             </h3>
             <ul className="list-decimal pl-6 space-y-4 text-gray-800 text-base md:text-lg font-medium leading-relaxed">
               <li>হলিডে/উইকেন্ড ডিউটি এবং ওভারটাইম ডিউটি সুপারিশ করার পর সংশ্লিষ্ট রিপোর্ট প্রিন্ট করতে হবে এবং কর্মী ও সুপারভাইজার উভয়ের স্বাক্ষর গ্রহণ করতে হবে।</li>
-              <li>প্রিন্ট কপিতে উল্লেখিত তথ্য এবং অনলাইনে সাবমিট করা তথ্য যেন একই হয়—এটি নিশ্চিত করতে হবে।</li>
+              <li>প্রিন্ট কপিতে উল্লেখিত তথ্য এবং অনলাইনে সাবমিট করা তথ্য যেন একই হয়—এটি নিশ্চিত করতে হবে।</li>
             </ul>
           </div>
 
@@ -277,12 +333,12 @@ export default function App() {
 
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 text-sm md:text-base text-gray-700">
              <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-               📌 বিশেষ দ্রষ্টব্য:
+                📌 বিশেষ দ্রষ্টব্য:
              </h4>
-             <p className="mb-4">কোনো যোগ্য কর্মীর অ্যাটেনডেন্স পোর্টালে পাওয়া না গেলে, অথবা তালিকায় নাম না থাকলেও অনুমোদিত ওভারটাইম বা হলিডে ডিউটি থাকলে— অনুগ্রহ করে যোগাযোগ করুনঃ</p>
+             <p className="mb-4">কোনো যোগ্য কর্মীর অ্যাটেনডেন্স পোর্টালে পাওয়া না গেলে, অথবা তালিকায় নাম না থাকলেও অনুমোদিত ওভারটাইম বা হলিডে ডিউটি থাকলে— অনুগ্রহ করে যোগাযোগ করুনঃ</p>
              <div className="font-bold text-[#006a4e] bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
                 মোঃ নাদিম হোসেন <br/>
-                সিনিয়র অফিসার, এইচআর <br/>
+                সিনিয়র অফিসার, এইচআর <br/>
                 ফোনঃ <span className="text-blue-700">01847334930</span> | এক্সটেনশনঃ <span className="text-blue-700">65187</span>
              </div>
           </div>
@@ -297,7 +353,7 @@ export default function App() {
         </div>
       )}
 
-{/* REPORT VIEW */}
+      {/* REPORT VIEW */}
       {view === 'REPORT' && data && (
         <div id="resultArea">
           <div className="bg-[#f0f9f6] p-4 rounded-lg mb-6 border border-[#006a4e]/20 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -342,38 +398,42 @@ export default function App() {
             <h3 className="text-xl font-bold text-gray-900 border-b-2 border-[#006a4e] pb-2 mb-4">
               Review Summary: {data.info?.name} - {data.dateRange}
             </h3>
+            
             <p className="text-sm text-[#006a4e] mb-6 font-bold leading-relaxed">
-              Common Weekend = 04 Days <br /> Holiday = 04 Days <br />Weekdays/Working Days = 20 Days
+              Common Weekend = {sysConfig?.weekend || '...'} <br /> 
+              Holiday = {sysConfig?.holiday || '...'} <br />
+              Common Shift = {sysConfig?.commonShift || '...'} <br />
+              Special Shift = {sysConfig?.specialShift || '...'}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {[
                 { 
                   id: 'otDutyDays', 
-                  label: `1. Total Overtime Duty Days in February 2026`, 
-                  sub: `[February 2026 মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
+                  label: `1. Total Overtime Duty Days in ${targetMonthText}`, 
+                  sub: `[${targetMonthText} মাসে মোট কয়দিন উনাকে ওভারটাইম ডিউটির অনুমতি দিয়েছিলেন?]`,
                   type: 'text',
                   placeholder: 'e.g. 5'
                 },
                 { 
                   id: 'totalOtHours', 
-                  label: `2. Total Overtime Hours in February 2026`, 
-                  sub: `[February 2026 মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
+                  label: `2. Total Overtime Hours in ${targetMonthText}`, 
+                  sub: `[${targetMonthText} মাসে উনার সর্বমোট ওভারটাইম কত ঘন্টা?]`,
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
                 },
                 { 
                   id: 'totalHolidayDays', 
-                  label: '3. Total Holiday/Weekend Duty Days in February 2026', 
-                  sub: '[February 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]',
+                  label: `3. Total Holiday/Weekend Duty Days in ${targetMonthText}`, 
+                  sub: `[${targetMonthText} মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতদিন?]`,
                   type: 'text',
                   placeholder: 'e.g. 3'
                 },
                 { 
                   id: 'totalHolidayHours', 
-                  label: '4.  Total Holiday/Weekend Duty Hours (8 hours/day for usual days, 6:30 Hours/day for Ramadan)', 
-                  sub: '[February 2026 মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা? (সাধারণ শিফট ৮ ঘন্টা/দিন এবং রমজান মাসে ৬ঃ৩০ ঘন্টা/দিন হিসেবে]',
+                  label: `4. Total Holiday/Weekend Duty Hours (${sysConfig?.commonShift}/day for usual days, ${sysConfig?.specialShift}/day for special/Ramadan)`, 
+                  sub: `[${targetMonthText} মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা? (সাধারণ শিফট ${sysConfig?.commonShift}/দিন এবং বিশেষ শিফট ${sysConfig?.specialShift}/দিন হিসেবে)]`,
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
@@ -400,7 +460,7 @@ export default function App() {
                <ul className="list-decimal pl-6 space-y-2 font-semibold">
                 <li>যেকোনো হলিডে বা ওভারটাইম ডিউটি বিলের ক্ষেত্রে উপস্থিতির পাঞ্চ বাধ্যতামূলক।</li>
                 <li>সুপারভাইজারের রিকমেন্ডেশন অবশ্যই উক্ত এমপ্লয়ীর জন্য ম্যানেজমেন্ট প্রদত্ত অনুমোদনের সঙ্গে সামঞ্জস্যপূর্ণ হতে হবে।</li>
-                <li>উপস্থিতির পাঞ্চ থাকলেও সুপারভাইজার এর রিকমেন্ডেশন ব্যতীত হলিডে বা ওভারটাইম ডিউটি বিল প্রদান করা হবে না।</li>
+                <li>উপস্থিতির পাঞ্চ থাকলেও সুপারভাইজার এর রিকমেন্ডেশন ব্যতীত হলিডে বা ওভারটাইম ডিউটি বিল প্রদান করা হবে নিয়োগ হবে না।</li>
                </ul>
             </div>
 
