@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 // the constants and types have been included directly in this file. 
 // When copying to your local project, you can restore your `import { API_URL } from './constants';` 
 // OR simply update the URL below with your real Google Apps Script web app URL.
-const API_URL = "https://script.google.com/macros/s/AKfycb_REPLACE_THIS_WITH_YOUR_ACTUAL_ID/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbyGvPes-Dg7Mzh2_Sr_NbZ_AA3fD2NQTka5n9EeLAQ23kFHorDMoWxAdthLStwHa3H0XA/exec"; 
 const APP_TITLE = "DIU Master Automation Engine";
 const TUTORIAL_URL = "https://drive.google.com/file/d/1pO-BADnvdbjUqSkUPrlLnFG1EeQJxbZl/view";
 
