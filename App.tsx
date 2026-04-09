@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 // --- CONSTANTS & TYPES ---
-// Replace this with your actual Google Apps Script Web App URL
-const API_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL"; 
+// Since this environment requires a single self-contained file to compile the preview, 
+// the constants and types have been included directly in this file. 
+// When copying to your local project, you can restore your `import { API_URL } from './constants';` 
+// OR simply update the URL below with your real Google Apps Script web app URL.
+const API_URL = "https://script.google.com/macros/s/AKfycb_REPLACE_THIS_WITH_YOUR_ACTUAL_ID/exec"; 
 const APP_TITLE = "DIU Master Automation Engine";
 const TUTORIAL_URL = "https://drive.google.com/file/d/1pO-BADnvdbjUqSkUPrlLnFG1EeQJxbZl/view";
 
@@ -77,14 +80,27 @@ export default function App() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
 
+  // Helper to check if URL is configured properly
+  const isApiConfigured = () => {
+    return API_URL && API_URL.startsWith('https://') && !API_URL.includes('REPLACE_THIS');
+  };
+
   // --- FETCH CONFIGURATION ON LOAD ---
   useEffect(() => {
     const fetchConfig = async () => {
+      if (!API_URL.startsWith('https://')) return;
+
       try {
         const response = await fetch(`${API_URL}?action=getConfig`);
-        const res = await response.json();
-        if (res.success) {
-          setSysConfig(res.data);
+        const text = await response.text();
+        
+        try {
+          const res = JSON.parse(text);
+          if (res.success) {
+            setSysConfig(res.data);
+          }
+        } catch (parseError) {
+          console.error("Failed to parse config JSON.", text);
         }
       } catch (e) {
         console.error("Failed to load system config", e);
@@ -116,12 +132,23 @@ export default function App() {
 
   // --- ACTIONS ---
   const handleSearch = async () => {
+    if (!isApiConfigured()) {
+      return alert("⚠️ CONFIGURATION REQUIRED\n\nPlease update the API_URL variable in your code to your real Apps Script deployment link.");
+    }
+
     if (!empId.trim()) return alert("Please Enter an Employee ID");
     
     setView('LOADING');
     try {
       const response = await fetch(`${API_URL}?action=search&id=${empId}`);
-      const res: SearchResult = await response.json();
+      const text = await response.text();
+      
+      let res: SearchResult;
+      try {
+        res = JSON.parse(text);
+      } catch (err) {
+        throw new Error(`Expected JSON but received HTML. Make sure your Apps Script Web App is deployed as "Execute as: Me" and "Who has access: Anyone".`);
+      }
       
       if (!res.found) {
         alert("Employee ID Not Found in Database");
@@ -139,8 +166,8 @@ export default function App() {
         totalHolidayHours: '0:00'
       }));
       setView('REPORT');
-    } catch (e) {
-      alert("Connection Error. Please check your internet.\nDetails: " + e);
+    } catch (e: any) {
+      alert("Connection Error. Please check your internet or URL.\nDetails: " + e.message);
       setView('SEARCH');
     }
   };
@@ -165,7 +192,13 @@ export default function App() {
     try {
       // 2. Duplicate Check BEFORE sending OTP
       const checkResponse = await fetch(`${API_URL}?action=checkDuplicate&id=${form.empId}`);
-      const checkRes = await checkResponse.json();
+      const checkText = await checkResponse.text();
+      let checkRes;
+      try {
+        checkRes = JSON.parse(checkText);
+      } catch(e) {
+        throw new Error("Invalid response during duplicate check.");
+      }
 
       if (checkRes.exists) {
         const confirmOverwrite = window.confirm(
@@ -184,9 +217,13 @@ export default function App() {
       // 3. Proceed to send OTP if no duplicate OR user clicked 'OK'
       const response = await fetch(API_URL, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8', 
+        },
         body: JSON.stringify({ action: 'sendOtp', email: email })
       });
-      const res = await response.json();
+      const text = await response.text();
+      const res = JSON.parse(text);
       
       setOtpLoading(false);
       if (res.success) {
@@ -196,9 +233,9 @@ export default function App() {
       } else {
         alert("Error sending email: " + res.message);
       }
-    } catch (e) {
+    } catch (e: any) {
       setOtpLoading(false);
-      alert("System Error: " + e);
+      alert("System Error: " + e.message);
     }
   };
 
@@ -207,9 +244,14 @@ export default function App() {
     try {
       const response = await fetch(API_URL, { 
         method: 'POST', 
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
         body: JSON.stringify({ action: 'verify', email, otp: otpInput, formData: form }) 
       });
-      const res = await response.json();
+      const text = await response.text();
+      const res = JSON.parse(text);
+      
       setVerifyLoading(false);
       if (res.success) {
         setShowOtpModal(false);
@@ -217,9 +259,9 @@ export default function App() {
       } else {
         alert("❌ " + res.message);
       }
-    } catch (e) {
+    } catch (e: any) {
       setVerifyLoading(false);
-      alert("Verification Failed: " + e);
+      alert("Verification Failed: " + e.message);
     }
   };
 
@@ -432,8 +474,8 @@ export default function App() {
                 },
                 { 
                   id: 'totalHolidayHours', 
-                  label: `4. Total Holiday/Weekend Duty Hours (${sysConfig?.commonShift}/day for usual days, ${sysConfig?.specialShift}/day for special/Ramadan)`, 
-                  sub: `[${targetMonthText} মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা? (সাধারণ শিফট ${sysConfig?.commonShift}/দিন এবং বিশেষ শিফট ${sysConfig?.specialShift}/দিন হিসেবে)]`,
+                  label: `4. Total Holiday/Weekend Duty Hours (${sysConfig?.commonShift || '8 Hours'}/day for usual days, ${sysConfig?.specialShift || '6:30 Hours'}/day for special/Ramadan)`, 
+                  sub: `[${targetMonthText} মাসে উনার মোট হলিডে বা উইকেন্ড ডিউটি কতঘন্টা? (সাধারণ শিফট ${sysConfig?.commonShift || '৮ ঘন্টা'}/দিন এবং বিশেষ শিফট ${sysConfig?.specialShift || '৬ঃ৩০ ঘন্টা'}/দিন হিসেবে)]`,
                   type: 'text',
                   placeholder: 'h:mm',
                   useTimeBlur: true
